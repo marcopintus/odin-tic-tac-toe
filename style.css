@@ -1,0 +1,60 @@
+@import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Stoke&display=swap');
+
+:root{
+    --bckg : rgb(248, 194, 15);
+    --frg : rgb(211, 76, 42);
+}
+
+*{  
+    background-color: var(--bckg);
+    color: var(--frg);
+    font-family: Bebas Neue;
+}
+
+body{
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+
+.main-title{
+    font-size: 96px;
+    text-align: center;
+    margin: 40px;
+}
+
+.board-container{
+    width: 600px;
+    height: 600px;
+    display: grid;
+    grid-template-columns: repeat(3,1fr);
+    grid-template-rows: repeat(3,1fr);
+    align-self: center;
+    justify-self: center;
+    
+}
+
+.tile{
+    width: 200px;
+    height: 200px;
+    margin: 0;
+    font-size: 88px;
+    background-color: var(--bckg);
+    color: var(--frg);
+    border: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.fr,
+.mr{
+    border-bottom: 4px solid var(--frg) 
+}
+
+.one,
+.two{
+    border-right: 4px solid var(--frg);
+}
+
