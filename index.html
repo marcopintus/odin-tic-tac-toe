@@ -23,5 +23,42 @@
         <button class="tile lr two"   id="b7"></button>
         <button class="tile lr three" id="b8"></button>
     </div>
+    <button class="button restart-button">Restart</button>
+    <div class="human-cpu-modal showing">
+        <div class="hcm-title">
+            Human or AI competitor?
+        </div>
+        <button class="pl-cpu" id="human">
+            <img class="icon person-img" src="./icons/person.svg" alt="Person icon">
+            <div>Human</div> 
+        </button>
+        <button class="pl-cpu" id="cpu">      
+            <img class="icon person-img" src="./icons/cpu.svg" alt="Person icon">    
+            <div>AI</div> 
+        </button>
+    </div>
+    <div class="human-name-modal ">
+        <div class="player" id="player1">
+            <div class="mark-id">X-player</div>   
+            <img class="icon person-img" src="./icons/person.svg" alt="Person icon">
+            <label>Name:</label>
+            <input class="name-input" id="X-name" type="text" placeholder="Insert name here...">
+        </div>
+        <div class="player" id="player2">
+            <div class="mark-id">O-player</div> 
+            <img class="icon person-img" src="./icons/person.svg" alt="Person icon">    
+            <label>Name:</label>
+            <input class="name-input" id="O-name" type="text" placeholder="Insert name here...">
+        </div>
+        <button class="button play-button">Play</button>
+    </div>
+    <div class="end-game-modal">
+        <div class="greetings-container">
+            <div class="greetings">
+                
+            </div>
+            <button class="button restart-button play-again">Play Again</button>
+        </div>
+    </div>
 </body>
 </html>
