@@ -25,9 +25,16 @@ const Gameboard = ( () => {
     let randomTile 
 
     const cpuRandomMove = () =>{
-        let emptyTiles = getEmptyElem();
+        let emptyTiles = getEmptyElem(board);
         let randomTile = chooseRandomTile(emptyTiles);
         cpuWriteAndSwitch(randomTile,playerTwo,playerOne);
+        GameResults.checkRes(board)
+    }
+
+    const cpuBossMove = (board) => {
+        let newBoard = [...board]
+        let bestMove = AiPlayer.minimax(newBoard,playerTwo)
+        cpuWriteAndSwitch(bestMove.index,playerTwo,playerOne);
         GameResults.checkRes(board)
     }
  
@@ -55,16 +62,19 @@ const Gameboard = ( () => {
                     if (tile.textContent == ''){
                         writeAndSwitch(tile,player1,player2);
                         GameResults.checkRes(board)
-                        setTimeout(cpuRandomMove,600);
-                    }
-                        
+                        if (ai == false){
+                            setTimeout(cpuRandomMove,600);
+                        } else if(ai == true){
+                            setTimeout(cpuBossMove(board),600);
+                        }
+                    }   
             })
             }) 
         }
 
     };
 
-    const getEmptyElem = () => {
+    const getEmptyElem = (board) => {
         let emptyIdx = [];
         for(let i = 0; i < board.length; i++){
             if(board[i]==undefined){
@@ -97,7 +107,6 @@ const Player = (name,mark,active,human) => {
     return {name,mark,active,human};
 };
 
-
 const GameLogic = ( () => {
 
     const humanPlay = () => {
@@ -109,18 +118,32 @@ const GameLogic = ( () => {
         })
     }
 
+
     const cpuDifficultySetting = () => {
+        cpuCpuSel.forEach(button => {
+            button.addEventListener("click", ()=> {
+                if (button.id == "random"){
+                    ai = false;
+                    cpuDiffModal.classList.remove("showing");
+                    play(playerOne,playerTwo);
+                } else if(button.id == "impossible"){
+                    ai = true;
+                    cpuDiffModal.classList.remove("showing");
+                    play(playerOne,playerTwo);
+                }
+            })
+        })
         
-        play(playerOne,playerTwo)
     }
 
     const gameSelection = () => {
         cpuHumanSel.forEach(button => {
             button.addEventListener("click", () => {
                 if (button.id == "cpu") {
-                    cpuHumanModal.classList.remove("showing");   
+                    cpuHumanModal.classList.remove("showing");  
+                    cpuDiffModal.classList.add("showing");
                     playerTwo.human = false;  
-                    cpuDifficultySetting()               
+                    cpuDifficultySetting()            
                 } else if (button.id == "human") {
                     cpuHumanModal.classList.remove("showing");
                     humanModal.classList.add("showing")
@@ -129,14 +152,11 @@ const GameLogic = ( () => {
                 }
             })
         })
-
-       
     }
 
     const play = (player1,player2) => {
         Gameboard.populate(player1,player2)
-        restartButton.addEventListener("click", Gameboard.restart)
-        
+        restartButton.addEventListener("click", Gameboard.restart)  
     }
 
     const game = (player1,player2) => {
@@ -152,7 +172,6 @@ const GameResults = ( (board) => {
         for(let i = 0; i<9; i+=3){
             row = board.slice(i,i+3);
             if (row.join("") == "XXX" || row.join("") == "OOO"){
-                console.log("Row: WON", row.join("")[0])
                 let win = true, winMrk = row.join("")[0];
                 return {win,winMrk}
             } 
@@ -164,7 +183,6 @@ const GameResults = ( (board) => {
         for(let i  = 0; i<3; i++){
             col = [board[i],board[i+3],board[i+6]];
             if (col.join("") == "XXX" || col.join("") == "OOO"){
-                console.log("Col: WON", col.join("")[0])
                 let win = true, winMrk = col.join("")[0];
                 return {win,winMrk}
             }  
@@ -175,15 +193,12 @@ const GameResults = ( (board) => {
         let diag1 = [board[0],board[4],board[8]];
         let diag2 = [board[2],board[4],board[6]];
         if (diag1.join("") == "XXX" || diag1.join("") == "OOO"){
-            console.log("Diag1: WON" , diag1.join("")[0])
             let win = true, winMrk = diag1.join("")[0];
             return {win,winMrk}
         } else if (diag2.join("") == "XXX" || diag2.join("") == "OOO"){
-            console.log("Diag2: WON",diag2.join("")[0])
             let win = true, winMrk = diag2.join("")[0];
             return {win,winMrk}
         }
-        
     }
 
     const checkDraw = (board) => {
@@ -193,24 +208,35 @@ const GameResults = ( (board) => {
         }
     }
 
+    const generalWin = (board) => {
+        rowRes = checkRow(board);
+        colRes = checkCol(board);
+        diagRes = checkDiag(board);
+        if (rowRes != undefined && rowRes.win){
+            return {w:true,m:rowRes.winMrk}    
+        } else if(colRes != undefined && colRes.win ){
+            return {w:true,m:colRes.winMrk} 
+        } else if(diagRes != undefined && diagRes.win){
+            return {w:true,m:diagRes.winMrk}   
+        } else {
+            return false;
+        } 
+    }
+
     const checkRes = (board) =>{
         let rowRes = checkRow(board);
         let colRes = checkCol(board);
         let diagRes = checkDiag(board);
         let drawRes = checkDraw(board);
         if (rowRes != undefined && rowRes.win) {
-            console.log("winner:",rowRes.winMrk)
             endGame(rowRes.winMrk)
         } else if (colRes != undefined && colRes.win) {
-            console.log("winner:",colRes.winMrk)
             endGame(colRes.winMrk)
         } else if (diagRes != undefined && diagRes.win) {
-            console.log("winner:",diagRes.winMrk)
             endGame(diagRes.winMrk)
         } else if (drawRes){
             mrk = undefined;
             endGame(mrk)
-            console.log("REAL DRAW")
         }
     }
 
@@ -228,12 +254,62 @@ const GameResults = ( (board) => {
             Gameboard.restart() 
             endGameModal.classList.remove("showing");  
             
-        })
-        
+        }) 
     }
-    return {checkRes}
+    return {checkRes,generalWin}
 }
 )()
+
+const AiPlayer = ( () => {
+    const minimax = (newBoard,player) => {
+
+        let emptySpots = Gameboard.getEmptyElem(newBoard);
+        res = GameResults.generalWin(newBoard) 
+        if (res.w && res.m == "X") {
+            return {score: -10};
+        } else if(res.w && res.m == "O") {
+            return {score: 10};
+        } else if (emptySpots.length == 0){
+            return {score: 0};
+        }
+        let moves = [];
+        for (let i = 0; i < emptySpots.length ;i++){
+            let move ={};
+            move.index = emptySpots[i];
+            newBoard[emptySpots[i]] = player.mark;     
+            if (player == playerTwo){
+                let result = minimax(newBoard,playerOne)
+                move.score = result.score;
+            } else {
+                let result = minimax(newBoard,playerTwo)
+                move.score = result.score;
+            }
+            newBoard[emptySpots[i]] = undefined;
+            moves.push(move)
+        }
+        let bestMove;
+        if (player == playerTwo){
+            let bestScore = -10000;
+            for(let i = 0; i< moves.length; i++){
+                if(moves[i].score > bestScore){
+                    bestScore = moves[i].score;
+                    bestMove = i;
+                }
+            }
+        } else {
+            let bestScore = 10000; 
+            for( let i = 0; i < moves.length; i++){
+                if (moves[i].score < bestScore){
+                    bestScore = moves[i].score;
+                    bestMove = i
+                }
+            }
+        }
+        return moves[bestMove];
+
+    }
+    return {minimax}
+})()
 
 
 const boardContainer = document.querySelector(".board-container");
@@ -246,9 +322,13 @@ const humanModal = document.querySelector(".human-name-modal");
 const playButton = document.querySelector(".play-button");
 const cpuHumanSel = document.querySelectorAll(".pl-cpu");
 const cpuHumanModal = document.querySelector(".human-cpu-modal");
+const cpuDiffModal = document.querySelector(".cpu-diff-modal");
+const cpuCpuSel = document.querySelectorAll(".difficulty");
 
 const playerOne = Player('You','X',true,true)
 const playerTwo = Player('The AI','O',false)
+
+let ai
 
 GameLogic.game(playerOne,playerTwo)
 
